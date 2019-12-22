@@ -6,6 +6,12 @@ import java.util.TreeSet;
 import index.Index;
 import index.InvertedIndex;
 
+/**
+ * Dumps an index's vocabulary to the standard output.
+ * Must be run in the directory containing the index files.
+ * @author dfisher
+ *
+ */
 public class DumpVocabulary {
 	public static void main(String[] args) {    	
 		Index index = new InvertedIndex();

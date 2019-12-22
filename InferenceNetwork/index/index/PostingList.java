@@ -6,14 +6,11 @@ import java.util.List;
 /**
  * Inverted List interface
  * NB: the interface is minimalist and could present more support for iteration
- *
- */
-/**
  * @author dfisher
  *
  */
 public class PostingList {
-	List<Posting> postings;
+	private List<Posting> postings;
 	private int postingsIndex;
 	public PostingList () {
 		postings = new ArrayList<Posting>();
@@ -26,8 +23,8 @@ public class PostingList {
 		postingsIndex = 0;
 	}
 	/**
-	 * are there any more
-	 * @return true if there are remaining elements in the list
+	 * are there any more?
+	 * @return true if there are remaining elements in the list, otherwise false
 	 */
 	public boolean hasMore() {
 		return (postingsIndex >= 0 && postingsIndex < postings.size());
@@ -77,7 +74,7 @@ public class PostingList {
 		postings.add(posting);
 		postingsIndex++;
 	}
-	
+
 	/**
 	 * @param docid the document to add a position to
 	 * @param position the position to add
@@ -93,6 +90,7 @@ public class PostingList {
 	}
 	/**
 	 * Transform to an array of integers for encoding
+	 * @return the PostingList represented as a flat array of Integers
 	 */
 	public Integer[] toIntegerArray () {
 		ArrayList <Integer> retval = new ArrayList<Integer>();
@@ -101,8 +99,12 @@ public class PostingList {
 			retval.addAll(p.toIntegerArray());
 		}
 		return retval.toArray(new Integer[retval.size()]);
-		
+
 	}
+	/**
+	 * Construct a PostingList from an array of int
+	 * @param input the array of int values constituting the PostingList.
+	 */
 	public void fromIntegerArray(int[] input) {
 		// format is (docid count positions)+
 		int idx = 0;
@@ -116,30 +118,33 @@ public class PostingList {
 		}
 		postingsIndex = 0; // reset the list pointer
 	}
-	
+
+	/**
+	 * @return The frequency of the term in the collection
+	 */
 	public int termFrequency() {
 		return postings.stream().mapToInt(p -> p.getTermFreq()).sum();
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		int savedIdx = postingsIndex;
-        startIteration();
-        while (hasMore()) {
-        	Posting p = getCurrentPosting();
-        	int doc = p.getDocId();
-        	Integer [] positions = p.getPositionsArray();
-        	buf.append("{").append(doc).append(", ");
-        	buf.append(positions.length).append(" [");
-        	
-        	for (int i : positions) {
-        		buf.append(i).append(" ");
-        	}
-        	buf.append(" ]} ");
-        	skipTo(doc  + 1);
-        }
-        postingsIndex = savedIdx;
-        return buf.toString();
+		startIteration();
+		while (hasMore()) {
+			Posting p = getCurrentPosting();
+			int doc = p.getDocId();
+			Integer [] positions = p.getPositionsArray();
+			buf.append("{").append(doc).append(", ");
+			buf.append(positions.length).append(" [");
+
+			for (int i : positions) {
+				buf.append(i).append(" ");
+			}
+			buf.append(" ]} ");
+			skipTo(doc  + 1);
+		}
+		postingsIndex = savedIdx;
+		return buf.toString();
 	}
 }

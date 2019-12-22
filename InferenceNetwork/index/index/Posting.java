@@ -11,7 +11,7 @@ public class Posting {
 
 	private List<Integer> positions;
 	private Integer docId;
-	
+
 	/**
 	 * Create a new Posting for a term
 	 * @param position the first position of the term
