@@ -83,7 +83,6 @@ public class PostingList {
 	 * @param position the position to add
 	 */
 	public void add(Integer docid, Integer position) {
-		//TODO: this needs to be an Extent...
 		Posting current = getCurrentPosting();
 		if (current != null && current.getDocId().equals(docid) ) {
 			current.add(position);
