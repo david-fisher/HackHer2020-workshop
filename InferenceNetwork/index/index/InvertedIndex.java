@@ -13,9 +13,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import utilities.Compression;
-import utilities.CompressionFactory;
-import utilities.Compressors;
+import utilities.EmptyCompression;
 
 
 /**
@@ -46,19 +44,17 @@ public class InvertedIndex implements Index {
     private Map<Integer, String> sceneIdMap = new HashMap<Integer, String>();
     private Map<Integer, String> playIdMap = new HashMap<Integer, String>();
     private Map<Integer, Integer> docLengths = new HashMap<Integer, Integer>();
-	private Compressors compression;
 	private Map<String, LookUp> lookup = new HashMap<String, LookUp>(); // key = term
-
+	private EmptyCompression compressor;
     private long collectionSize;
     private double aveDocLen;
     private int numOfDoc;
     private String termInvListFile;
 
     @Override
-    public void load(boolean compress) {
-    	this.compression = compress ? Compressors.VBYTE : Compressors.EMPTY;
-    	termInvListFile = Constants.INVLIST;
-
+    public void load() {
+        compressor = new EmptyCompression();
+      	termInvListFile = Constants.INVLIST;
         loadStringMap(Constants.SCENE_ID_TXT, sceneIdMap);
         loadStringMap(Constants.PLAY_IDS_TXT, playIdMap);
         loadDocLengths(Constants.DOC_LENGTH_TXT);
@@ -138,9 +134,8 @@ public class InvertedIndex implements Index {
             byte[] buffer = new byte[buffLength];
             int numRead = reader.read(buffer, 0, buffLength);
             assert numRead == look.numBytes;
-            Compression comp = CompressionFactory.getCompressor(compression);
             IntBuffer intBuffer = IntBuffer.allocate(buffer.length);
-            comp.decode(buffer, intBuffer);   
+            compressor.decode(buffer, intBuffer);   
             int[] data = new int[intBuffer.position()];
             intBuffer.rewind();
             intBuffer.get(data);

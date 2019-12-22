@@ -53,10 +53,8 @@ public interface Index {
 	
 	/**
 	 *  Load an index into memory to use.
-	 *  NB: this really ought not to have the parameter...
-	 * @param compress whether or not the index is compressed
 	 */
-	public void load(boolean compress);
+	public void load();
 	/**
 	 * NB: this gets refactored out when doing InferenceNetwork query retrieval
 	 * @param query the query terms to run as a space separated string

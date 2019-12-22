@@ -12,14 +12,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import utilities.*;
+import utilities.EmptyCompression;
 
 public class IndexBuilder {
     private Map<Integer, String> sceneIdMap; 
     private Map<Integer, String> playIdMap;
     private Map<String, PostingList> invertedLists;
     private Map<Integer, Integer> docLengths;
-	private Compressors compression;
 
 	public IndexBuilder() {
 	    sceneIdMap = new HashMap<Integer, String>();
@@ -98,7 +97,7 @@ public class IndexBuilder {
         try {
             PrintWriter lookupWriter = new PrintWriter(lookupName, "UTF-8");
             RandomAccessFile invListWriter = new RandomAccessFile(invListName, "rw");
-            Compression comp = CompressionFactory.getCompressor(compression);
+            EmptyCompression comp = new EmptyCompression();
 
             for (Map.Entry<String, PostingList> entry : invertedLists.entrySet()) {
                 String term = entry.getKey();
@@ -125,12 +124,9 @@ public class IndexBuilder {
 
     /**
      * @param sourcefile the json file containing the collection
-     * @param compress whether or not to compress the index using vbyte compression.
      */
-    public void buildIndex(String sourcefile, boolean compress) {
-    	this.compression = compress ? Compressors.VBYTE : Compressors.EMPTY;
+    public void buildIndex(String sourcefile) {
         parseFile(sourcefile);
-        // refactor the hardcoded names...
         saveStringMap(Constants.SCENE_ID_TXT, sceneIdMap);
         saveStringMap(Constants.PLAY_IDS_TXT, playIdMap);
         saveDocLengths(Constants.DOC_LENGTH_TXT);
