@@ -129,12 +129,11 @@ public class IndexBuilder {
      */
     public void buildIndex(String sourcefile, boolean compress) {
     	this.compression = compress ? Compressors.VBYTE : Compressors.EMPTY;
-    	String invFile = compress ? "invListCompressed" : "invList";
         parseFile(sourcefile);
         // refactor the hardcoded names...
-        saveStringMap("sceneId.txt", sceneIdMap);
-        saveStringMap("playIds.txt", playIdMap);
-        saveDocLengths("docLength.txt");
-        saveInvertedLists("lookup.txt", invFile);
+        saveStringMap(Constants.SCENE_ID_TXT, sceneIdMap);
+        saveStringMap(Constants.PLAY_IDS_TXT, playIdMap);
+        saveDocLengths(Constants.DOC_LENGTH_TXT);
+        saveInvertedLists(Constants.LOOKUP_TXT, Constants.INVLIST);
     }
  }

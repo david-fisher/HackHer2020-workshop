@@ -57,12 +57,12 @@ public class InvertedIndex implements Index {
     @Override
     public void load(boolean compress) {
     	this.compression = compress ? Compressors.VBYTE : Compressors.EMPTY;
-    	termInvListFile = compress ? "invListCompressed" : "invList";
+    	termInvListFile = Constants.INVLIST;
 
-        loadStringMap("sceneId.txt", sceneIdMap);
-        loadStringMap("playIds.txt", playIdMap);
-        loadDocLengths("docLength.txt");
-        loadLookUp("lookup.txt");
+        loadStringMap(Constants.SCENE_ID_TXT, sceneIdMap);
+        loadStringMap(Constants.PLAY_IDS_TXT, playIdMap);
+        loadDocLengths(Constants.DOC_LENGTH_TXT);
+        loadLookUp(Constants.LOOKUP_TXT);
 
     }
     
