@@ -61,7 +61,7 @@ public interface Index {
 	 * NB: this gets refactored out when doing InferenceNetwork query retrieval
 	 * @param query the query terms to run as a space separated string
 	 * @param k the number of entries to return
-	 * @return
+	 * @return The ranked list of internal document ids with their scores.
 	 */
 	public List<Entry<Integer, Double>> retrieveQuery(String query, int k);
 	/**
