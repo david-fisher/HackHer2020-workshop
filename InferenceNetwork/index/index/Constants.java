@@ -8,7 +8,7 @@ package index;
 public class Constants {
 
 	/**
-	 * The term -> PostingList data lookup table as a text file
+	 * The term to PostingList data lookup table as a text file
 	 */
 	static final String LOOKUP_TXT = "lookup.txt";	
     /**
