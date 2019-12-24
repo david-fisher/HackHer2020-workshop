@@ -204,36 +204,4 @@ public class InvertedIndex implements Index {
 	public String getDocName(int docId) {
 		return getScene(docId);
 	}
-
-	@Override
-	public List<Map.Entry<Integer, Double>> retrieveQuery(String query, int k) {
-		PriorityQueue<Map.Entry<Integer, Double>> result = 
-				new PriorityQueue<>(Map.Entry.<Integer, Double>comparingByValue());
-		String [] queryTerms = query.split("\\s+");
-		PostingList[] lists = new PostingList[queryTerms.length];
-		for (int i = 0; i < queryTerms.length; i++) {
-			lists[i] = getPostings(queryTerms[i]);
-		}
-		for (int doc = 1; doc <= getDocCount(); doc++) {
-			Double curScore = 0.0;
-			for (PostingList p : lists) {
-				p.skipTo(doc);
-				Posting post = p.getCurrentPosting();
-				if (post!= null && post.getDocId() == doc) {
-					// This is where our score function gets used later
-					curScore += post.getTermFreq();
-				}
-			}
-			result.add(new AbstractMap.SimpleEntry<Integer, Double>(doc, curScore));
-			// trim the queue if necessary
-			if (result.size() > k) {
-				result.poll();
-			}
-		}
-		// reverse the queue
-		ArrayList<Map.Entry<Integer, Double>> scores = new ArrayList<Map.Entry<Integer, Double>>();
-		scores.addAll(result);
-		scores.sort(Map.Entry.<Integer, Double>comparingByValue(Comparator.reverseOrder()));
-		return scores;
-	}
 }

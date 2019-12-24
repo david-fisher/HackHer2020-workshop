@@ -55,14 +55,7 @@ public interface Index {
 	 *  Load an index into memory to use.
 	 */
 	public void load();
-	/**
-	 * NB: this gets refactored out when doing InferenceNetwork query retrieval
-	 * @param query the query terms to run as a space separated string
-	 * @param k the number of entries to return
-	 * @return The ranked list of internal document ids with their scores.
-	 */
-	public List<Entry<Integer, Double>> retrieveQuery(String query, int k);
-	/**
+		/**
 	 * @param key document id number
 	 * @return the external document id associated with that number.
 	 */
