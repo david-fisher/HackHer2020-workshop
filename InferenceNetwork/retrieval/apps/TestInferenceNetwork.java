@@ -1,10 +1,5 @@
 package apps;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +10,7 @@ import index.InvertedIndex;
 import retrieval.AndNode;
 import retrieval.Dirichlet;
 import retrieval.InferenceNetwork;
+import retrieval.NotNode;
 import retrieval.OrNode;
 import retrieval.OrderedWindow;
 import retrieval.ProximityNode;
@@ -22,56 +18,35 @@ import retrieval.QueryNode;
 import retrieval.RetrievalModel;
 import retrieval.TermNode;
 import retrieval.UnorderedWindow;
-/*
- * *
-Q1: the king queen royalty
-Q2: servant guard soldier
-Q3: hope dream sleep
-Q4: ghost spirit
-Q5: fool jester player
-Q6: to be or not to be
-Q7: alas
-Q8: alas poor
-Q9: alas poor yorick
-Q10: antony strumpet
-
-Please run these queries using the two phrase operators, ordered window and unordered window.
-For ordered, use a distance of 1 (exact phrase), for unordered, use a window width 
-3*|Q| (three times the length of the query). Please run these queries with each of the 
-operators: SUM, AND, OR, and MAX. Use dirichlet smoothing with μ=1500 for all runs.
+/**
+ * Usage java apps.TestInferenceNetwork
+ * 
+ * Must be run in the working directory that contains the index to search.
+ * 
+ * we will test the following queries, retrieving the top 10 documents:
+Q1: fool jester player
+Q2: to be or not to be
+Q3: alas poor yorick
+Q4: antony strumpet
  */
 public class TestInferenceNetwork {
 
 	public static void main(String[] args) {
-		int k = Integer.parseInt(args[0]);
+		int k = 10;
 		Index index = new InvertedIndex();
-		index.load();
+		index.load(); // we assume that the index files are in the current directory.
 
 		RetrievalModel model = new Dirichlet(index, 1500);
 		List<Map.Entry<Integer, Double>> results;
 		InferenceNetwork network = new InferenceNetwork();
 		QueryNode queryNode;
-		ArrayList<ProximityNode> children;
-		
-		// read in the queries
-		String queryFile = args[2];
-		List<String> queries = new ArrayList<String>();
-		try {
-			String query;
-
-			BufferedReader reader = new BufferedReader(new FileReader(queryFile));
-			while (( query = reader.readLine()) != null) {
-				queries.add(query);
-			}
-			reader.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		String outfile, runId, qId;
-		int qNum = 0;
-		
-		outfile = "od1.trecrun";
-		runId = "dafisher-od1-dir-1500";
+		ArrayList<? extends ProximityNode> children;
+		String [] queries = {"fool jester player", "to be or not to be",
+				"alas poor yorick", "antony strumpet"};
+		String qId, runId = "hack(h)er2020-";
+		int qNum;
+		qNum = 0;
+		// ordered window
 		for (String query : queries) {
 			qNum++;
 			// make each of the required query nodes and run the queries
@@ -79,21 +54,10 @@ public class TestInferenceNetwork {
 			queryNode = new OrderedWindow(1, children, index, model);
 			results = network.runQuery(queryNode, k);
 			qId = "Q" + qNum;
-			boolean append = qNum > 1;
-			try {
-				PrintWriter writer = new PrintWriter(new FileWriter(outfile, append));
-				printResults(results, index, writer, runId, qId);
-				writer.close();
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			printResults(results, index, runId + "od1", qId);
 		}
-		
-		//unordered
-		outfile = "uw.trecrun";
-		runId = "dafisher-uw-dir-1500";
 		qNum = 0;
+		//unordered window
 		for (String query : queries) {
 			qNum++;
 			// make each of the required query nodes and run the queries
@@ -102,22 +66,10 @@ public class TestInferenceNetwork {
 			queryNode = new UnorderedWindow(winSize, children, index, model);
 			results = network.runQuery(queryNode, k);
 			qId = "Q" + qNum;
-			boolean append = qNum > 1;
-			try {
-				PrintWriter writer = new PrintWriter(new FileWriter(outfile, append));
-				printResults(results, index, writer, runId, qId);
-				writer.close();
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			printResults(results, index, runId + "uw" + winSize, qId);
 		}
-
-
-		// and
-		outfile = "and.trecrun";
-		runId = "dafisher-and-dir-1500";
 		qNum = 0;
+		//and
 		for (String query : queries) {
 			qNum++;
 			// make each of the required query nodes and run the queries
@@ -125,21 +77,10 @@ public class TestInferenceNetwork {
 			queryNode = new AndNode(children);
 			results = network.runQuery(queryNode, k);
 			qId = "Q" + qNum;
-			boolean append = qNum > 1;
-			try {
-				PrintWriter writer = new PrintWriter(new FileWriter(outfile, append));
-				printResults(results, index, writer, runId, qId);
-				writer.close();
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			printResults(results, index, runId + "and", qId);
 		}
-
-		// or
-		outfile = "or.trecrun";
-		runId = "dafisher-or-dir-1500";
 		qNum = 0;
+		//or
 		for (String query : queries) {
 			qNum++;
 			// make each of the required query nodes and run the queries
@@ -147,27 +88,32 @@ public class TestInferenceNetwork {
 			queryNode = new OrNode(children);
 			results = network.runQuery(queryNode, k);
 			qId = "Q" + qNum;
-			boolean append = qNum > 1;
-			try {
-				PrintWriter writer = new PrintWriter(new FileWriter(outfile, append));
-				printResults(results, index, writer, runId, qId);
-				writer.close();
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			printResults(results, index, runId + "or", qId);
 		}
+		// not using a single complex query
+		// #and (alas poor #not (yorick) )
+		qNum++;
+		children = genTermNodes("yorick", index, model);
+		NotNode not = new NotNode(children);
+		children = genTermNodes("alas poor", index, model);
+		ArrayList<? super QueryNode> combined = new ArrayList<>();
+		combined.addAll(children);
+		combined.add(not);
+		queryNode = new AndNode(children);
+		results = network.runQuery(queryNode, k);
+		qId = "Q" + qNum;
+		printResults(results, index, runId + "and-not", qId);
 	}
 
 	private static void printResults(List<Entry<Integer, Double>> results, 
-			Index index, PrintWriter writer, String runId, String qId) {
+			Index index, String runId, String qId) {
 		int rank = 1;
 		for (Map.Entry<Integer, Double> entry : results) {
 			String sceneId = index.getDocName(entry.getKey());
 			String resultLine = qId + " skip " + sceneId + " " + rank + " " 
 					+ String.format("%.7f", entry.getValue()) + " " + runId;
 
-			writer.println(resultLine);
+			System.out.println(resultLine);
 			rank++;
 		}
 	}

@@ -4,6 +4,8 @@ import index.IndexBuilder;
 
 /**
  * Constructs an InvertedIndex from the specified source file.
+ * 
+ * Usage apps.BuildIndex pathtoinputdatafile
  * @author dfisher
  *
  */
